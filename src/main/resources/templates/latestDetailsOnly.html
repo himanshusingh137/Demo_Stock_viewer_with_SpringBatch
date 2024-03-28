@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8">
+<title>Latest Stocks Details</title>
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body style="background-color: bisque;">
+
+	<div>
+		<h2 align="center" style="color: white; background-color: purple;">Stock
+			Details</h2>
+		<div align="left">
+			<h3>
+				<a th:href="@{/home}">&lt;--back</a>
+			</h3>
+		</div>
+		<br>
+
+		<!-- Search bar with icon -->
+		<div class="container" style="max-width: 600px;">
+			<div class="row">
+				<div class="col">
+					<div class="input-group mb-3">
+						<input type="text" class="form-control" id="searchInput"
+							placeholder="Search by symbol...">
+						<div class="input-group-append">
+							<button class="btn btn-outline-secondary" type="button"
+								id="searchButton">
+								<i class="fas fa-search"></i> Search
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="col">
+					<div class="input-group mb-3">
+						<input type="date" class="form-control" id="startDateInput">
+						<input type="date" class="form-control" id="endDateInput">
+						<div class="input-group-append">
+							<button class="btn btn-outline-secondary" type="button"
+								id="searchDateButton">
+								<i class="fas fa-search"></i> Search by Date
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		<div class="col-sm-5" align="center">
+			<div class="panel-body">
+				<table class="table">
+					<thead class="thead-pink">
+						<tr>
+							<th>Stock ID</th>
+							<th>SYMBOL</th>
+							<th>SERIES</th>
+							<th>OPEN</th>
+							<th>CLOSE</th>
+							<th>HIGH</th>
+							<th>LOW</th>
+							<th>LAST</th>
+							<th>PREV_CLOSE</th>
+							<th>TIMESTAMP</th>
+						</tr>
+					</thead>
+					<tbody id="tableBody">
+						<tr th:each="data : ${onlyLatestDetails}">
+							<td th:text="${data[1].id}">-</td>
+							<td th:text="${data[1].symbol}">-</td>
+							<td th:text="${data[1].series}">-</td>
+							<td th:text="${data[0].open}">-</td>
+							<td th:text="${data[0].close}">-</td>
+							<td th:text="${data[0].high}">-</td>
+							<td th:text="${data[0].low}">-</td>
+							<td th:text="${data[0].last}">-</td>
+							<td th:text="${data[0].prevclose}">-</td>
+							<td th:text="${data[0].timestamp}">-</td>
+
+							<!-- Add "View Chart" button for each row -->
+							<td>
+								<button class="btn btn-success view-chart-btn" style="background-color: purple; white-space: nowrap;"
+									th:data-symbol="${data[1].symbol}">View Chart</button>
+							</td>
+
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<!-- JavaScript for filtering -->
+	<script>
+    document.getElementById("searchButton").addEventListener("click", function() {
+        var symbol = document.getElementById("searchInput").value.trim();
+        if(symbol !== "") {
+            $.ajax({
+                url: "/fetchDataBySymbolOnlyLatest",
+                type: "GET",
+                data: { symbol: symbol },
+                success: function(response) {
+                    updateTable(response);
+                },
+                error: function(error) {
+                    console.log("Error:", error);
+                }
+            });
+        } else {
+            // Optionally handle the case where the search field is empty
+            // For example, reload the page or fetch all data again
+        }
+    });
+
+    function updateTable(data) {
+        var tableBody = document.getElementById("tableBody");
+        tableBody.innerHTML = ""; // Clear existing rows
+
+        data.forEach(function(item) {
+            var row = `<tr>
+                <td>${item[1].id}</td>
+                <td>${item[1].symbol}</td>
+                <td>${item[1].series}</td>
+                <td>${item[0].open}</td>
+                <td>${item[0].close}</td>
+                <td>${item[0].high}</td>
+                <td>${item[0].low}</td>
+                <td>${item[0].last}</td>
+                <td>${item[0].prevclose}</td>
+                <td>${item[0].timestamp}</td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
+    }
+   
+    // for dates search
+    
+    document.getElementById("searchDateButton").addEventListener("click", function() {
+        var startDate = document.getElementById("startDateInput").value.trim();
+        var endDate = document.getElementById("endDateInput").value.trim();
+        if(startDate !== "" && endDate !== "") {
+            $.ajax({
+                url: "/fetchDataByDateRange",
+                type: "GET",
+                data: { startDate: startDate, endDate: endDate },
+                success: function(response) {
+                    updateTable(response);
+                },
+                error: function(error) {
+                    console.log("Error:", error);
+                }
+            });
+        } else {
+            // Optionally handle the case where either start or end date is empty
+        }
+    });
+    
+    document.querySelectorAll('.view-chart-btn').forEach(button => {
+        button.addEventListener('click', function() {
+           const stockSymbol = this.dataset.symbol;    // array 
+            // Open a new tab with detailed information
+            window.open('/view_chart?stockSymbol=' + stockSymbol , '_blank');
+        });
+    });
+    
+</script>
+
+</body>
+</html>

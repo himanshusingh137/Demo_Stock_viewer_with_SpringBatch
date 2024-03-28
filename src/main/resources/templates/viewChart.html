@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8">
+<title>View Chart</title>
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+/* Style for the chart container */
+#chart-container {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 80%; /* Adjust width as needed */
+	height: 80%; /* Adjust height as needed */
+}
+</style>
+
+</head>
+<body>
+
+	<!-- Container for the chart -->
+	<div id="chart-container">
+		<canvas id="myChart" width="200" height="200"></canvas>
+	</div>
+
+	
+
+
+	<script th:inline="javascript">
+		// JavaScript code for creating the chart will go here
+
+		/* Extract data from Thymeleaf model */
+		var dataList = /*[[${allDataOfSpecificSymbol}]]*/[];
+
+		/* Process data and prepare labels and values */
+		var labels = [];
+		var values = [];
+		for (var i = 0; i < dataList.length; i++) {
+			var object = dataList[i];
+			// Assuming 'timestamp' and 'close' are properties of each object
+			labels.push(object[0].timestamp);
+			values.push(object[0].close);
+		}
+
+		// Get the canvas element
+		var ctx = document.getElementById('myChart').getContext('2d');
+
+		var myChart = new Chart(ctx, {
+			type : 'bar',
+			data : {
+				labels : labels,
+				datasets : [ {
+					label : 'Bar Chart',
+					data : values,
+					backgroundColor : 'rgba(54, 162, 235, 0.2)',
+					borderColor : 'rgba(54, 162, 235, 1)',
+					borderWidth : 1
+				} ]
+			},
+			options : {
+				scales : {
+					yAxes : [ {
+						ticks : {
+							beginAtZero : true
+						}
+					} ]
+				}
+			}
+		});
+	</script>
+
+</body>
+</html>
